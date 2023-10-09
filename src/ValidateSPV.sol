@@ -80,72 +80,70 @@ library ValidateSPV {
 
     /// @notice                  Checks validity of header chain
     /// @notice                  Compares the hash of each header to the prevHash in the next header
-    /// @param _headers          Raw byte array of header chain
-    /// @return _totalDifficulty The total accumulated difficulty of the header chain, or an error code
-    function validateHeaderChain(bytes memory _headers) internal view returns (uint256 _totalDifficulty) {
+    /// @param headers           Raw byte array of header chain
+    /// @return totalDifficulty  The total accumulated difficulty of the header chain, or an error code
+    function validateHeaderChain(
+        bytes memory headers
+    ) internal view returns (uint256 totalDifficulty) {
 
         // Check header chain length
-        if (_headers.length % 80 != 0) {return ERR_BAD_LENGTH;}
+        if (headers.length % 80 != 0) {return ERR_BAD_LENGTH;}
 
         // Initialize header start index
-        bytes32 _digest;
+        bytes32 digest;
 
-        _totalDifficulty = 0;
+        totalDifficulty = 0;
 
-        bytes memory _header;
-
-        // Allocate _header with extra space after it to fit 3 full words
-        assembly {
-            _header := mload(0x40)
-            mstore(0x40, add(_header, add(32, 96)))
-            mstore(_header, 80)
-        }
-
-        for (uint256 _start = 0; _start < _headers.length; _start += 80) {
-
-            // ith header start index and ith header
-            _headers.sliceInPlace(_header, _start);
+        for (uint256 start = 0; start < headers.length; start += 80) {
 
             // After the first header, check that headers are in a chain
-            if (_start != 0) {
-                if (!validateHeaderPrevHash(_header, _digest)) {return ERR_INVALID_CHAIN;}
+            if (start != 0) {
+                if (!validateHeaderPrevHash(headers, start, digest)) {return ERR_INVALID_CHAIN;}
             }
 
             // ith header target
-            uint256 _target = _header.extractTarget();
+            uint256 target = headers.extractTargetAt(start);
 
             // Require that the header has sufficient work
-            _digest = _header.hash256View();
-            if(uint256(_digest).reverseUint256() > _target) {
+            digest = headers.hash256Slice(start, 80);
+            if(uint256(digest).reverseUint256() > target) {
                 return ERR_LOW_WORK;
             }
 
             // Add ith header difficulty to difficulty sum
-            _totalDifficulty = _totalDifficulty.add(_target.calculateDifficulty());
+            totalDifficulty = totalDifficulty + target.calculateDifficulty();
         }
     }
 
     /// @notice             Checks validity of header work
-    /// @param _digest      Header digest
-    /// @param _target      The target threshold
+    /// @param digest       Header digest
+    /// @param target       The target threshold
     /// @return             true if header work is valid, false otherwise
-    function validateHeaderWork(bytes32 _digest, uint256 _target) internal pure returns (bool) {
-        if (_digest == bytes32(0)) {return false;}
-        return (uint256(_digest).reverseUint256() < _target);
+    function validateHeaderWork(
+        bytes32 digest,
+        uint256 target
+    ) internal pure returns (bool) {
+        if (digest == bytes32(0)) {return false;}
+        return (uint256(digest).reverseUint256() < target);
     }
 
     /// @notice                     Checks validity of header chain
     /// @dev                        Compares current header prevHash to previous header's digest
-    /// @param _header              The raw bytes header
-    /// @param _prevHeaderDigest    The previous header's digest
+    /// @param headers              The raw bytes array containing the header
+    /// @param at                   The position of the header
+    /// @param prevHeaderDigest     The previous header's digest
     /// @return                     true if the connect is valid, false otherwise
-    function validateHeaderPrevHash(bytes memory _header, bytes32 _prevHeaderDigest) internal pure returns (bool) {
+    function validateHeaderPrevHash(
+        bytes memory headers,
+        uint256 at,
+        bytes32 prevHeaderDigest
+    ) internal pure returns (bool) {
 
         // Extract prevHash of current header
-        bytes32 _prevHash = _header.extractPrevBlockLE();
+        bytes32 prevHash = headers.extractPrevBlockLEAt(at);
 
         // Compare prevHash of current header to previous header's digest
-        if (_prevHash != _prevHeaderDigest) {return false;}
+        if (prevHash != prevHeaderDigest) {return false;}
 
         return true;
     }
