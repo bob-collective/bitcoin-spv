@@ -73,6 +73,6 @@ library ValidateSPVDelegate {
     /// @param _prevHeaderDigest    The previous header's digest
     /// @return                     true if header chain is valid, false otherwise
     function validateHeaderPrevHash(bytes memory _header, bytes32 _prevHeaderDigest) public pure returns (bool) {
-        return ValidateSPV.validateHeaderPrevHash(_header, _prevHeaderDigest);
+        return ValidateSPV.validateHeaderPrevHash(_header, 0, _prevHeaderDigest);
     }
 }

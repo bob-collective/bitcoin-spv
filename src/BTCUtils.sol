@@ -248,6 +248,25 @@ library BTCUtils {
         }
     }
 
+    /// @notice          Implements bitcoin's hash256 (double sha2)
+    /// @dev             sha2 is precompiled smart contract located at address(2)
+    /// @param _b        The array containing the pre-image
+    /// @param at        The start of the pre-image
+    /// @param len       The length of the pre-image
+    /// @return res      The digest
+    function hash256Slice(
+        bytes memory _b,
+        uint256 at,
+        uint256 len
+    ) internal view returns (bytes32 res) {
+        // solium-disable-next-line security/no-inline-assembly
+        assembly {
+            pop(staticcall(gas(), 2, add(_b, add(32, at)), len, 0x00, 32))
+            pop(staticcall(gas(), 2, 0x00, 32, 0x00, 32))
+            res := mload(0x00)
+        }
+    }
+
     /* ************ */
     /* Legacy Input */
     /* ************ */
@@ -517,6 +536,17 @@ library BTCUtils {
         return _beValue;
     }
 
+    /// @notice          Extracts the value from the output in a tx
+    /// @dev             Value is an 8-byte little-endian number
+    /// @param _output   The byte array containing the output
+    /// @param _at       The starting index of the output in the array
+    /// @return          The output value
+    function extractValueAt(bytes memory _output, uint256 _at) internal pure returns (uint64) {
+        uint64 _leValue = uint64(_output.slice8(_at));
+        uint64 _beValue = reverseUint64(_leValue);
+        return _beValue;
+    }
+
     /// @notice          Extracts the data from an op return output
     /// @dev             Returns hex"" if no data or not an op return
     /// @param _output   The output
@@ -534,46 +564,62 @@ library BTCUtils {
     /// @param _output   The output
     /// @return          The hash committed to by the pk_script, or null for errors
     function extractHash(bytes memory _output) internal pure returns (bytes memory) {
-        uint8 _scriptLen = uint8(_output[8]);
+        return extractHashAt(_output, 8, _output.length - 8);
+    }
+
+    /// @notice          Extracts the hash from the output script
+    /// @dev             Determines type by the length prefix and validates format
+    /// @param _output   The byte array containing the output
+    /// @param _at       The starting index of the output script in the array
+    ///                  (output start + 8)
+    /// @param _len      The length of the output script
+    ///                  (output length - 8)
+    /// @return          The hash committed to by the pk_script, or null for errors
+    function extractHashAt(
+        bytes memory _output,
+        uint256 _at,
+        uint256 _len
+    ) internal pure returns (bytes memory) {
+        uint8 _scriptLen = uint8(_output[_at]);
 
         // don't have to worry about overflow here.
-        // if _scriptLen + 9 overflows, then output.length would have to be < 9
-        // for this check to pass. if it's < 9, then we errored when assigning
+        // if _scriptLen + 1 overflows, then output length would have to be < 1
+        // for this check to pass. if it's < 1, then we errored when assigning
         // _scriptLen
-        if (_scriptLen + 9 != _output.length) {
+        if (_scriptLen + 1 != _len) {
             return hex"";
         }
 
-        if (uint8(_output[9]) == 0) {
+        if (uint8(_output[_at + 1]) == 0) {
             if (_scriptLen < 2) {
                 return hex"";
             }
-            uint256 _payloadLen = uint8(_output[10]);
+            uint256 _payloadLen = uint8(_output[_at + 2]);
             // Check for maliciously formatted witness outputs.
             // No need to worry about underflow as long b/c of the `< 2` check
             if (_payloadLen != _scriptLen - 2 || (_payloadLen != 0x20 && _payloadLen != 0x14)) {
                 return hex"";
             }
-            return _output.slice(11, _payloadLen);
+            return _output.slice(_at + 3, _payloadLen);
         } else {
-            bytes3 _tag = _output.slice3(8);
+            bytes3 _tag = _output.slice3(_at);
             // p2pkh
             if (_tag == hex"1976a9") {
                 // Check for maliciously formatted p2pkh
                 // No need to worry about underflow, b/c of _scriptLen check
-                if (uint8(_output[11]) != 0x14 ||
-                    _output.slice2(_output.length - 2) != hex"88ac") {
+                if (uint8(_output[_at + 3]) != 0x14 ||
+                    _output.slice2(_at + _len - 2) != hex"88ac") {
                     return hex"";
                 }
-                return _output.slice(12, 20);
+                return _output.slice(_at + 4, 20);
             //p2sh
             } else if (_tag == hex"17a914") {
                 // Check for maliciously formatted p2sh
                 // No need to worry about underflow, b/c of _scriptLen check
-                if (uint8(_output[_output.length - 1]) != 0x87) {
+                if (uint8(_output[_at + _len - 1]) != 0x87) {
                     return hex"";
                 }
-                return _output.slice(11, 20);
+                return _output.slice(_at + 3, 20);
             }
         }
         return hex"";  /* NB: will trigger on OPRETURN and any non-standard that doesn't overrun */
@@ -677,8 +723,17 @@ library BTCUtils {
     /// @param _header   The header
     /// @return          The target threshold
     function extractTarget(bytes memory _header) internal pure returns (uint256) {
-        uint24 _m = uint24(_header.slice3(72));
-        uint8 _e = uint8(_header[75]);
+        return extractTargetAt(_header, 0);
+    }
+
+    /// @notice          Extracts the target from a block header
+    /// @dev             Target is a 256-bit number encoded as a 3-byte mantissa and 1-byte exponent
+    /// @param _header   The array containing the header
+    /// @param at        The start of the header
+    /// @return          The target threshold
+    function extractTargetAt(bytes memory _header, uint256 at) internal pure returns (uint256) {
+        uint24 _m = uint24(_header.slice3(72 + at));
+        uint8 _e = uint8(_header[75 + at]);
         uint256 _mantissa = uint256(reverseUint24(_m));
         uint _exponent = _e - 3;
 
@@ -701,6 +756,18 @@ library BTCUtils {
     /// @return          The previous block's hash (little-endian)
     function extractPrevBlockLE(bytes memory _header) internal pure returns (bytes32) {
         return _header.slice32(4);
+    }
+
+    /// @notice          Extracts the previous block's hash from a block header
+    /// @dev             Block headers do NOT include block number :(
+    /// @param _header   The array containing the header
+    /// @param at        The start of the header
+    /// @return          The previous block's hash (little-endian)
+    function extractPrevBlockLEAt(
+        bytes memory _header,
+        uint256 at
+    ) internal pure returns (bytes32) {
+        return _header.slice32(4 + at);
     }
 
     /// @notice          Extracts the timestamp from a block header
