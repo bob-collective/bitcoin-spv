@@ -1,19 +1,34 @@
-## Foundry
+## bitcoin-spv
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+> Forked from [keep-network/bitcoin-spv](https://github.com/keep-network/bitcoin-spv) which was forked from [summa-tx/bitcoin-spv](https://github.com/summa-tx/bitcoin-spv).
 
-Foundry consists of:
+`bitcoin-spv` is a low-level toolkit for working with Bitcoin from other
+blockchains. It supplies a set of pure functions that can be used to validate
+almost all Bitcoin transactions and headers, as well as higher-level
+functions that can evaluate header chains and transaction inclusion proofs.
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+It also supplies a standardized JSON format for proofs.
 
-## Documentation
+### What smart contract chains are supported?
 
-https://book.getfoundry.sh/
+This support any EVM-based chain such as Ethereum.
 
-## Usage
+### Bitcoin Endianness
+
+Block explorers tend to show txids and merkle roots in big-endian (BE) format.
+Most human-facing apps do this as well. However, due to Satoshi's inscrutable
+wisdom, almost all in-protocol data structures use little-endian (LE) byte
+order.
+
+When pulling txids and merkle nodes, make sure the endianness is correct
+
+1. They should be in LE for the proof construction
+1. They need to be in LE for hashing
+1. They are in LE in the merkle tree
+
+## Getting Started
+
+We use foundry extensively for maintaining and testing this contract suite:
 
 ### Build
 
@@ -33,34 +48,9 @@ $ forge test
 $ forge fmt
 ```
 
-### Gas Snapshots
+### IMPORTANT WARNING
 
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+It is extremely easy to write insecure code using these libraries. We do not
+recommend a specific security model. Any SPV verification involves complex
+security assumptions. Please seek external review for your design before
+building with these libraries.
