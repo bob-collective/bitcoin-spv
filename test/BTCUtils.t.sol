@@ -28,17 +28,11 @@ contract BTCUtilsTest is Test {
 
     function test_ReversesEndianness() public {
         ReverseEndiannessTest[2] memory testCases = [
-            ReverseEndiannessTest({
-                input: hex"00112233",
-                output: hex"33221100"
-            }),
-            ReverseEndiannessTest({
-                input: hex"0123456789abcdef",
-                output: hex"efcdab8967452301"
-            })
+            ReverseEndiannessTest({input: hex"00112233", output: hex"33221100"}),
+            ReverseEndiannessTest({input: hex"0123456789abcdef", output: hex"efcdab8967452301"})
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             bytes memory res = instance.reverseEndianness(testCases[i].input);
             assertEq(res, testCases[i].output);
         }
@@ -46,45 +40,28 @@ contract BTCUtilsTest is Test {
 
     struct BytesToUintTest {
         bytes input;
-        uint output;
+        uint256 output;
     }
 
     function test_ConvertsBigEndianBytesToIntegers() public {
         BytesToUintTest[6] memory testCases = [
-            BytesToUintTest({
-                input: hex"00",
-                output: 0
-            }),
-            BytesToUintTest({
-                input: hex"ff",
-                output: 255
-            }),
-            BytesToUintTest({
-                input: hex"ff00",
-                output: 65280
-            }),
-            BytesToUintTest({
-                input: hex"01",
-                output: 1
-            }),
-            BytesToUintTest({
-                input: hex"0001",
-                output: 1
-            }),
-            BytesToUintTest({
-                input: hex"0100",
-                output: 256
-            })
+            BytesToUintTest({input: hex"00", output: 0}),
+            BytesToUintTest({input: hex"ff", output: 255}),
+            BytesToUintTest({input: hex"ff00", output: 65280}),
+            BytesToUintTest({input: hex"01", output: 1}),
+            BytesToUintTest({input: hex"0001", output: 1}),
+            BytesToUintTest({input: hex"0100", output: 256})
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
-            uint res = instance.bytesToUint(testCases[i].input);
+        for (uint256 i = 0; i < testCases.length; i++) {
+            uint256 res = instance.bytesToUint(testCases[i].input);
             assertEq(res, testCases[i].output);
         }
     }
 
     function test_ImplementsBitcoinsHash160() public {
-        bytes memory input = hex"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+        bytes memory input =
+            hex"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
         bytes memory output = hex"1b60c31dba9403c74d81af255f0c300bfed5faa3";
 
         bytes memory res1 = instance.hash160(input);
@@ -101,17 +78,11 @@ contract BTCUtilsTest is Test {
 
     function test_ImplementsBitcoinsHash256() public {
         Hash256Test[2] memory testCases = [
-            Hash256Test({
-                input: hex"00",
-                output: hex"1406e05881e299367766d313e26c05564ec91bf721d31726bd6e46e60689539a"
-            }),
-            Hash256Test({
-                input: hex"616263",
-                output: hex"4f8b42c22dd3729b519ba6f68d2da7cc5b2d606d05daed5ad5128cc03e6c6358"
-            })
+            Hash256Test({input: hex"00", output: hex"1406e05881e299367766d313e26c05564ec91bf721d31726bd6e46e60689539a"}),
+            Hash256Test({input: hex"616263", output: hex"4f8b42c22dd3729b519ba6f68d2da7cc5b2d606d05daed5ad5128cc03e6c6358"})
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             bytes32 res1 = instance.hash256(testCases[i].input);
             assertEq(res1, testCases[i].output);
 
@@ -140,7 +111,7 @@ contract BTCUtilsTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             bytes32 res = instance._hash256MerkleStep(testCases[i].inputLeft, testCases[i].inputRight);
             assertEq(res, testCases[i].output);
         }
@@ -148,25 +119,26 @@ contract BTCUtilsTest is Test {
 
     function test_ExtractsASequenceFromAWitnessInputAsLEAndInt() public {
         bytes memory input = hex"1746bd867400f3494b8f44c24b83e1aa58c4f0ff25b4a61cffeffd4bc0f9ba300000000000ffffffff";
-        
+
         bytes4 res1 = instance.extractSequenceLEWitness(input);
         bytes4 output1 = hex"ffffffff";
         assertEq(res1, output1);
 
-        uint res2 = instance.extractSequenceWitness(input);
-        uint output2 = 4294967295;
+        uint256 res2 = instance.extractSequenceWitness(input);
+        uint256 output2 = 4294967295;
         assertEq(res2, output2);
     }
 
     function test_ExtractsASequenceFromALegacyInputAsLEAndInt() public {
-        bytes memory input = hex"1746bd867400f3494b8f44c24b83e1aa58c4f0ff25b4a61cffeffd4bc0f9ba3000000000203232323232323232323232323232323232323232323232323232323232323232ffffffff";
-        
+        bytes memory input =
+            hex"1746bd867400f3494b8f44c24b83e1aa58c4f0ff25b4a61cffeffd4bc0f9ba3000000000203232323232323232323232323232323232323232323232323232323232323232ffffffff";
+
         bytes4 res1 = instance.extractSequenceLELegacy(input);
         bytes4 output1 = hex"ffffffff";
         assertEq(res1, output1);
 
-        uint res2 = instance.extractSequenceLegacy(input);
-        uint output2 = 4294967295;
+        uint256 res2 = instance.extractSequenceLegacy(input);
+        uint256 output2 = 4294967295;
         assertEq(res2, output2);
     }
 
@@ -221,7 +193,7 @@ contract BTCUtilsTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             bytes memory res = instance.extractHash(testCases[i].input);
             assertEq(res, testCases[i].output);
         }
@@ -230,7 +202,7 @@ contract BTCUtilsTest is Test {
     struct ExtractValueTest {
         bytes input;
         bytes8 outputRaw;
-        uint output;
+        uint256 output;
     }
 
     function test_ExtractsTheValueAsLEAndInt() public {
@@ -247,19 +219,18 @@ contract BTCUtilsTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             bytes8 res1 = instance.extractValueLE(testCases[i].input);
             assertEq(res1, testCases[i].outputRaw);
 
-            uint res2 = instance.extractValue(testCases[i].input);
+            uint256 res2 = instance.extractValue(testCases[i].input);
             assertEq(res2, testCases[i].output);
-
         }
     }
 
     struct DetermineInputLengthTest {
         bytes input;
-        uint output;
+        uint256 output;
     }
 
     function test_DeterminesInputLength() public {
@@ -286,8 +257,8 @@ contract BTCUtilsTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
-            uint res = instance.determineInputLength(testCases[i].input);
+        for (uint256 i = 0; i < testCases.length; i++) {
+            uint256 res = instance.determineInputLength(testCases[i].input);
             assertEq(res, testCases[i].output);
         }
     }
@@ -306,7 +277,7 @@ contract BTCUtilsTest is Test {
 
     struct ExtractInputAtIndexTest {
         bytes inputVin;
-        uint inputIndex;
+        uint256 inputIndex;
         bytes output;
     }
 
@@ -347,18 +318,15 @@ contract BTCUtilsTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
-            bytes memory res = instance.extractInputAtIndex(
-                testCases[i].inputVin,
-                testCases[i].inputIndex
-            );
+        for (uint256 i = 0; i < testCases.length; i++) {
+            bytes memory res = instance.extractInputAtIndex(testCases[i].inputVin, testCases[i].inputIndex);
             assertEq(res, testCases[i].output);
         }
     }
 
     struct ExtractInputAtIndexErrorTest {
         bytes inputVin;
-        uint inputIndex;
+        uint256 inputIndex;
         bytes errorMessage;
     }
 
@@ -402,12 +370,9 @@ contract BTCUtilsTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             vm.expectRevert(testCases[i].errorMessage);
-            instance.extractInputAtIndex(
-                testCases[i].inputVin,
-                testCases[i].inputIndex
-            );
+            instance.extractInputAtIndex(testCases[i].inputVin, testCases[i].inputIndex);
         }
     }
 
@@ -428,7 +393,7 @@ contract BTCUtilsTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             bool res = instance.isLegacyInput(testCases[i].input);
             assertEq(res, testCases[i].output);
         }
@@ -459,7 +424,7 @@ contract BTCUtilsTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             bytes memory res = instance.extractScriptSig(testCases[i].input);
             assertEq(res, testCases[i].output);
         }
@@ -472,8 +437,8 @@ contract BTCUtilsTest is Test {
 
     struct ExtractScriptSigLenTest {
         bytes input;
-        uint output1;
-        uint output2;
+        uint256 output1;
+        uint256 output2;
     }
 
     function test_ExtractsTheLengthOfTheVarIntAndScriptSigFromInputs() public {
@@ -495,7 +460,7 @@ contract BTCUtilsTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             (uint256 res1, uint256 res2) = instance.extractScriptSigLen(testCases[i].input);
             assertEq(res1, testCases[i].output1);
             assertEq(res2, testCases[i].output2);
@@ -544,13 +509,10 @@ contract BTCUtilsTest is Test {
                 output: false
             }),
             // Read overrun
-            ValidateVinTest({
-                input: hex"FF",
-                output: false
-            })
+            ValidateVinTest({input: hex"FF", output: false})
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             bool res = instance.validateVin(testCases[i].input);
             assertEq(res, testCases[i].output);
         }
@@ -601,18 +563,12 @@ contract BTCUtilsTest is Test {
                 output: false
             }),
             // Read overrun
-            ValidateVoutTest({
-                input: hex"FF",
-                output: false
-            }),
+            ValidateVoutTest({input: hex"FF", output: false}),
             // Read overrun
-            ValidateVoutTest({
-                input: hex"010102030405060708FF",
-                output: false
-            })
+            ValidateVoutTest({input: hex"010102030405060708FF", output: false})
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             bool res = instance.validateVout(testCases[i].input);
             assertEq(res, testCases[i].output);
         }
@@ -620,55 +576,31 @@ contract BTCUtilsTest is Test {
 
     struct DetermineOutputLengthTest {
         bytes input;
-        uint output;
+        uint256 output;
     }
 
     function test_DeterminesOutputLengthProperly() public {
         DetermineOutputLengthTest[8] memory testCases = [
-            DetermineOutputLengthTest({
-                input: hex"00000000000000002200",
-                output: 43
-            }),
-            DetermineOutputLengthTest({
-                input: hex"00000000000000001600",
-                output: 31
-            }),
-            DetermineOutputLengthTest({
-                input: hex"0000000000000000206a",
-                output: 41
-            }),
-            DetermineOutputLengthTest({
-                input: hex"000000000000000002",
-                output: 11
-            }),
-            DetermineOutputLengthTest({
-                input: hex"000000000000000000",
-                output: 9
-            }),
-            DetermineOutputLengthTest({
-                input: hex"000000000000000088",
-                output: 145
-            }),
-            DetermineOutputLengthTest({
-                input: hex"0000000000000000fc",
-                output: 261
-            }),
+            DetermineOutputLengthTest({input: hex"00000000000000002200", output: 43}),
+            DetermineOutputLengthTest({input: hex"00000000000000001600", output: 31}),
+            DetermineOutputLengthTest({input: hex"0000000000000000206a", output: 41}),
+            DetermineOutputLengthTest({input: hex"000000000000000002", output: 11}),
+            DetermineOutputLengthTest({input: hex"000000000000000000", output: 9}),
+            DetermineOutputLengthTest({input: hex"000000000000000088", output: 145}),
+            DetermineOutputLengthTest({input: hex"0000000000000000fc", output: 261}),
             // Non-minimal VarInt encoding
-            DetermineOutputLengthTest({
-                input: hex"0000000000000000FFfc00000000000000",
-                output: 269
-            })
+            DetermineOutputLengthTest({input: hex"0000000000000000FFfc00000000000000", output: 269})
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
-            uint res = instance.determineOutputLength(testCases[i].input);
+        for (uint256 i = 0; i < testCases.length; i++) {
+            uint256 res = instance.determineOutputLength(testCases[i].input);
             assertEq(res, testCases[i].output);
         }
     }
 
     struct ExtractOutputAtIndexTest {
         bytes inputVout;
-        uint inputIndex;
+        uint256 inputIndex;
         bytes output;
     }
 
@@ -714,18 +646,15 @@ contract BTCUtilsTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
-            bytes memory res = instance.extractOutputAtIndex(
-                testCases[i].inputVout,
-                testCases[i].inputIndex
-            );
+        for (uint256 i = 0; i < testCases.length; i++) {
+            bytes memory res = instance.extractOutputAtIndex(testCases[i].inputVout, testCases[i].inputIndex);
             assertEq(res, testCases[i].output);
         }
     }
 
     struct ExtractOutputAtIndexErrorTest {
         bytes inputVout;
-        uint inputIndex;
+        uint256 inputIndex;
         bytes errorMessage;
     }
 
@@ -781,17 +710,15 @@ contract BTCUtilsTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             vm.expectRevert(testCases[i].errorMessage);
-            instance.extractOutputAtIndex(
-                testCases[i].inputVout,
-                testCases[i].inputIndex
-            );
+            instance.extractOutputAtIndex(testCases[i].inputVout, testCases[i].inputIndex);
         }
     }
 
     function test_ExtractsARootFromAHeader() public {
-        bytes memory input = hex"0100000055bd840a78798ad0da853f68974f3d183e2bd1db6a842c1feecf222a00000000ff104ccb05421ab93e63f8c3ce5c2c2e9dbb37de2764b3a3175c8166562cac7d51b96a49ffff001d283e9e70";
+        bytes memory input =
+            hex"0100000055bd840a78798ad0da853f68974f3d183e2bd1db6a842c1feecf222a00000000ff104ccb05421ab93e63f8c3ce5c2c2e9dbb37de2764b3a3175c8166562cac7d51b96a49ffff001d283e9e70";
         bytes32 output = hex"ff104ccb05421ab93e63f8c3ce5c2c2e9dbb37de2764b3a3175c8166562cac7d";
 
         bytes32 res = instance.extractMerkleRootLE(input);
@@ -799,15 +726,17 @@ contract BTCUtilsTest is Test {
     }
 
     function test_ExtractsTheTargetFromAHeader() public {
-        bytes memory input = hex"0100000055bd840a78798ad0da853f68974f3d183e2bd1db6a842c1feecf222a00000000ff104ccb05421ab93e63f8c3ce5c2c2e9dbb37de2764b3a3175c8166562cac7d51b96a49ffff001d283e9e70";
+        bytes memory input =
+            hex"0100000055bd840a78798ad0da853f68974f3d183e2bd1db6a842c1feecf222a00000000ff104ccb05421ab93e63f8c3ce5c2c2e9dbb37de2764b3a3175c8166562cac7d51b96a49ffff001d283e9e70";
         bytes32 output = hex"00000000ffff0000000000000000000000000000000000000000000000000000";
 
-        uint res = instance.extractTarget(input);
-        assertEq(res, uint(output));
+        uint256 res = instance.extractTarget(input);
+        assertEq(res, uint256(output));
     }
 
     function test_ExtractsThePrevBlockHash() public {
-        bytes memory input = hex"0100000055bd840a78798ad0da853f68974f3d183e2bd1db6a842c1feecf222a00000000ff104ccb05421ab93e63f8c3ce5c2c2e9dbb37de2764b3a3175c8166562cac7d51b96a49ffff001d283e9e70";
+        bytes memory input =
+            hex"0100000055bd840a78798ad0da853f68974f3d183e2bd1db6a842c1feecf222a00000000ff104ccb05421ab93e63f8c3ce5c2c2e9dbb37de2764b3a3175c8166562cac7d51b96a49ffff001d283e9e70";
         bytes32 output = hex"55bd840a78798ad0da853f68974f3d183e2bd1db6a842c1feecf222a00000000";
 
         bytes32 res = instance.extractPrevBlockLE(input);
@@ -815,16 +744,17 @@ contract BTCUtilsTest is Test {
     }
 
     function test_ExtractsATimestampFromAHeader() public {
-        bytes memory input = hex"0100000055bd840a78798ad0da853f68974f3d183e2bd1db6a842c1feecf222a00000000ff104ccb05421ab93e63f8c3ce5c2c2e9dbb37de2764b3a3175c8166562cac7d51b96a49ffff001d283e9e70";
-        uint output = 1231731025;
+        bytes memory input =
+            hex"0100000055bd840a78798ad0da853f68974f3d183e2bd1db6a842c1feecf222a00000000ff104ccb05421ab93e63f8c3ce5c2c2e9dbb37de2764b3a3175c8166562cac7d51b96a49ffff001d283e9e70";
+        uint256 output = 1231731025;
 
-        uint res = instance.extractTimestamp(input);
+        uint256 res = instance.extractTimestamp(input);
         assertEq(res, output);
     }
 
     struct VerifyHash256MerkleTest {
         bytes inputProof;
-        uint inputIndex;
+        uint256 inputIndex;
         bool output;
     }
 
@@ -855,11 +785,7 @@ contract BTCUtilsTest is Test {
                 inputIndex: 781,
                 output: true
             }),
-            VerifyHash256MerkleTest({
-                inputProof: hex"00",
-                inputIndex: 0,
-                output: false
-            }),
+            VerifyHash256MerkleTest({inputProof: hex"00", inputIndex: 0, output: false}),
             VerifyHash256MerkleTest({
                 inputProof: hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                 inputIndex: 0,
@@ -872,18 +798,15 @@ contract BTCUtilsTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
-            bool res = instance.verifyHash256Merkle(
-                testCases[i].inputProof,
-                testCases[i].inputIndex
-            );
+        for (uint256 i = 0; i < testCases.length; i++) {
+            bool res = instance.verifyHash256Merkle(testCases[i].inputProof, testCases[i].inputIndex);
             assertEq(res, testCases[i].output);
         }
     }
 
     struct DetermineVarIntDataLengthTest {
         bytes input;
-        uint output;
+        uint256 output;
     }
 
     function test_DeterminesVarIntDataLengthsCorrectly() public {
@@ -906,44 +829,28 @@ contract BTCUtilsTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
-            uint res = instance.determineVarIntDataLength(testCases[i].input);
+        for (uint256 i = 0; i < testCases.length; i++) {
+            uint256 res = instance.determineVarIntDataLength(testCases[i].input);
             assertEq(res, testCases[i].output);
         }
     }
 
     struct ParseVarIntTest {
         bytes input;
-        uint outputNumBytes;
-        uint outputEncodedInt;
+        uint256 outputNumBytes;
+        uint256 outputEncodedInt;
     }
 
     function test_ParsesVarInts() public {
         ParseVarIntTest[4] memory testCases = [
-            ParseVarIntTest({
-                input: hex"01",
-                outputNumBytes: 0,
-                outputEncodedInt: 1
-            }),
-            ParseVarIntTest({
-                input: hex"ff0000000000000000",
-                outputNumBytes: 8,
-                outputEncodedInt: 0
-            }),
-            ParseVarIntTest({
-                input: hex"fe03000000",
-                outputNumBytes: 4,
-                outputEncodedInt: 3
-            }),
-            ParseVarIntTest({
-                input: hex"fd0001",
-                outputNumBytes: 2,
-                outputEncodedInt: 256
-            })
+            ParseVarIntTest({input: hex"01", outputNumBytes: 0, outputEncodedInt: 1}),
+            ParseVarIntTest({input: hex"ff0000000000000000", outputNumBytes: 8, outputEncodedInt: 0}),
+            ParseVarIntTest({input: hex"fe03000000", outputNumBytes: 4, outputEncodedInt: 3}),
+            ParseVarIntTest({input: hex"fd0001", outputNumBytes: 2, outputEncodedInt: 256})
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
-            (uint resNumBytes, uint resEncodedInt) = instance.parseVarInt(testCases[i].input);
+        for (uint256 i = 0; i < testCases.length; i++) {
+            (uint256 resNumBytes, uint256 resEncodedInt) = instance.parseVarInt(testCases[i].input);
             assertEq(resNumBytes, testCases[i].outputNumBytes);
             assertEq(resEncodedInt, testCases[i].outputEncodedInt);
         }
@@ -955,40 +862,36 @@ contract BTCUtilsTest is Test {
 
     function test_ReturnsErrorForInvalidVarInts() public {
         ParseVarIntErrorTest[3] memory testCases = [
-            ParseVarIntErrorTest({
-                input: hex"fd01"
-            }),
-            ParseVarIntErrorTest({
-                input: hex"fe010000"
-            }),
-            ParseVarIntErrorTest({
-                input: hex"ff01000000000000"
-            })
+            ParseVarIntErrorTest({input: hex"fd01"}),
+            ParseVarIntErrorTest({input: hex"fe010000"}),
+            ParseVarIntErrorTest({input: hex"ff01000000000000"})
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
-            (uint resNumBytes, uint resEncodedInt) = instance.parseVarInt(testCases[i].input);
-            assertEq(resNumBytes, uint(bytes32(hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")));
+        for (uint256 i = 0; i < testCases.length; i++) {
+            (uint256 resNumBytes, uint256 resEncodedInt) = instance.parseVarInt(testCases[i].input);
+            assertEq(
+                resNumBytes, uint256(bytes32(hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
+            );
             assertEq(resEncodedInt, 0);
         }
     }
 
     struct BlockHeader {
         bytes blockHash;
-        uint version;
+        uint256 version;
         bytes prevBlock;
         bytes merkleRoot;
-        uint timestamp;
+        uint256 timestamp;
         bytes nBits;
         bytes nonce;
-        uint difficulty;
+        uint256 difficulty;
         bytes blockHex;
-        uint height;
+        uint256 height;
     }
 
     struct RetargetAlgorithmTest {
         BlockHeader[3] input;
-        uint output;
+        uint256 output;
     }
 
     function test_CalculatesConsensusCorrectRetargets() public {
@@ -1405,32 +1308,32 @@ contract BTCUtilsTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
-            uint firstTimestamp = testCases[i].input[0].timestamp;
-            uint secondTimestamp = testCases[i].input[1].timestamp;
-            uint previousTarget = instance.extractTarget(testCases[i].input[1].blockHex);
-            uint expectedNewTarget = instance.extractTarget(testCases[i].input[2].blockHex);
-            uint res = instance.retargetAlgorithm(previousTarget, firstTimestamp, secondTimestamp);
+        for (uint256 i = 0; i < testCases.length; i++) {
+            uint256 firstTimestamp = testCases[i].input[0].timestamp;
+            uint256 secondTimestamp = testCases[i].input[1].timestamp;
+            uint256 previousTarget = instance.extractTarget(testCases[i].input[1].blockHex);
+            uint256 expectedNewTarget = instance.extractTarget(testCases[i].input[2].blockHex);
+            uint256 res = instance.retargetAlgorithm(previousTarget, firstTimestamp, secondTimestamp);
             assertEq(res & expectedNewTarget, expectedNewTarget);
 
-            uint secondTimestamp1 = firstTimestamp + 5 * 2016 * 10 * 60; // longer than 4x
-            uint res1 = instance.retargetAlgorithm(previousTarget, firstTimestamp, secondTimestamp1);
+            uint256 secondTimestamp1 = firstTimestamp + 5 * 2016 * 10 * 60; // longer than 4x
+            uint256 res1 = instance.retargetAlgorithm(previousTarget, firstTimestamp, secondTimestamp1);
             assertEq((res1 / 4) & previousTarget, previousTarget);
 
-            uint secondTimestamp2 = firstTimestamp + 2016 * 10 * 14; // shorter than 1/4x
-            uint res2 = instance.retargetAlgorithm(previousTarget, firstTimestamp, secondTimestamp2);
-            assertEq((res2 * 4) & previousTarget, previousTarget);      
+            uint256 secondTimestamp2 = firstTimestamp + 2016 * 10 * 14; // shorter than 1/4x
+            uint256 res2 = instance.retargetAlgorithm(previousTarget, firstTimestamp, secondTimestamp2);
+            assertEq((res2 * 4) & previousTarget, previousTarget);
         }
 
         // extracts difficulty from a header
-        for (uint i = 0; i < testCases.length; i++) {
-            uint res1 = instance.extractDifficulty(testCases[i].input[0].blockHex);
+        for (uint256 i = 0; i < testCases.length; i++) {
+            uint256 res1 = instance.extractDifficulty(testCases[i].input[0].blockHex);
             assertEq(res1, testCases[i].input[0].difficulty);
 
-            uint res2 = instance.extractDifficulty(testCases[i].input[1].blockHex);
+            uint256 res2 = instance.extractDifficulty(testCases[i].input[1].blockHex);
             assertEq(res2, testCases[i].input[1].difficulty);
 
-            uint res3 = instance.extractDifficulty(testCases[i].input[2].blockHex);
+            uint256 res3 = instance.extractDifficulty(testCases[i].input[2].blockHex);
             assertEq(res3, testCases[i].input[2].difficulty);
         }
     }

@@ -30,9 +30,12 @@ OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <https://unlicense.org>
 */
 
-
-/** @title BytesLib **/
-/** @author https://github.com/GNSPS **/
+/**
+ * @title BytesLib *
+ */
+/**
+ * @author https://github.com/GNSPS *
+ */
 
 library BytesLib {
     function concat(bytes memory _preBytes, bytes memory _postBytes) internal pure returns (bytes memory) {
@@ -83,24 +86,23 @@ library BytesLib {
             // length of the arrays.
             end := add(mc, length)
 
-            for {
-                let cc := add(_postBytes, 0x20)
-            } lt(mc, end) {
+            for { let cc := add(_postBytes, 0x20) } lt(mc, end) {
                 mc := add(mc, 0x20)
                 cc := add(cc, 0x20)
-            } {
-                mstore(mc, mload(cc))
-            }
+            } { mstore(mc, mload(cc)) }
 
             // Update the free-memory pointer by padding our last write location
             // to 32 bytes: add 31 bytes to the end of tempBytes to move to the
             // next 32 byte block, then round down to the nearest multiple of
             // 32. If the sum of the length of the two arrays is zero then add
             // one before rounding down to leave a blank 32 bytes (the length block with 0).
-            mstore(0x40, and(
-                add(add(end, iszero(add(length, mload(_preBytes)))), 31),
-                not(31) // Round down to the nearest 32 bytes.
-            ))
+            mstore(
+                0x40,
+                and(
+                    add(add(end, iszero(add(length, mload(_preBytes)))), 31),
+                    not(31) // Round down to the nearest 32 bytes.
+                )
+            )
         }
 
         return tempBytes;
@@ -145,14 +147,14 @@ library BytesLib {
                                     mload(add(_postBytes, 0x20)),
                                     // zero all bytes to the right
                                     exp(0x100, sub(32, mlength))
-                        ),
-                        // and now shift left the number of bytes to
-                        // leave space for the length in the slot
-                        exp(0x100, sub(32, newlength))
-                        ),
-                        // increase length by the double of the memory
-                        // bytes length
-                        mul(mlength, 2)
+                                ),
+                                // and now shift left the number of bytes to
+                                // leave space for the length in the slot
+                                exp(0x100, sub(32, newlength))
+                            ),
+                            // increase length by the double of the memory
+                            // bytes length
+                            mul(mlength, 2)
                         )
                     )
                 )
@@ -184,11 +186,8 @@ library BytesLib {
                 sstore(
                     sc,
                     add(
-                        and(
-                            fslot,
-                            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00
-                    ),
-                    and(mload(mc), mask)
+                        and(fslot, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00),
+                        and(mload(mc), mask)
                     )
                 )
 
@@ -198,9 +197,7 @@ library BytesLib {
                 } lt(mc, end) {
                     sc := add(sc, 1)
                     mc := add(mc, 0x20)
-                } {
-                    sstore(sc, mload(mc))
-                }
+                } { sstore(sc, mload(mc)) }
 
                 mask := exp(0x100, sub(mc, end))
 
@@ -232,9 +229,7 @@ library BytesLib {
                 } lt(mc, end) {
                     sc := add(sc, 1)
                     mc := add(mc, 0x20)
-                } {
-                    sstore(sc, mload(mc))
-                }
+                } { sstore(sc, mload(mc)) }
 
                 mask := exp(0x100, sub(mc, end))
 
@@ -243,11 +238,11 @@ library BytesLib {
         }
     }
 
-    function slice(bytes memory _bytes, uint _start, uint _length) internal  pure returns (bytes memory res) {
+    function slice(bytes memory _bytes, uint256 _start, uint256 _length) internal pure returns (bytes memory res) {
         if (_length == 0) {
             return hex"";
         }
-        uint _end = _start + _length;
+        uint256 _end = _start + _length;
         require(_end > _start && _bytes.length >= _end, "Slice out of bounds");
 
         assembly {
@@ -262,11 +257,7 @@ library BytesLib {
             for {
                 let src := add(add(_bytes, 32), _start)
                 let end := add(src, _length)
-            } lt(src, end) {
-                src := add(src, 32)
-            } {
-                mstore(add(src, diff), mload(src))
-            }
+            } lt(src, end) { src := add(src, 32) } { mstore(add(src, diff), mload(src)) }
         }
     }
 
@@ -276,13 +267,9 @@ library BytesLib {
     /// @param _bytes The source array
     /// @param _dest The destination array.
     /// @param _start The location to start in the source array.
-    function sliceInPlace(
-        bytes memory _bytes,
-        bytes memory _dest,
-        uint _start
-    ) internal pure {
-        uint _length = _dest.length;
-        uint _end = _start + _length;
+    function sliceInPlace(bytes memory _bytes, bytes memory _dest, uint256 _start) internal pure {
+        uint256 _length = _dest.length;
+        uint256 _end = _start + _length;
         require(_end > _start && _bytes.length >= _end, "Slice out of bounds");
 
         assembly {
@@ -293,47 +280,45 @@ library BytesLib {
             } lt(src, end) {
                 src := add(src, 32)
                 res := add(res, 32)
-            } {
-                mstore(res, mload(src))
-            }
+            } { mstore(res, mload(src)) }
         }
     }
 
     // Static slice functions, no bounds checking
     /// @notice take a 32-byte slice from the specified position
-    function slice32(bytes memory _bytes, uint _start) internal pure returns (bytes32 res) {
+    function slice32(bytes memory _bytes, uint256 _start) internal pure returns (bytes32 res) {
         assembly {
             res := mload(add(add(_bytes, 32), _start))
         }
     }
 
     /// @notice take a 20-byte slice from the specified position
-    function slice20(bytes memory _bytes, uint _start) internal pure returns (bytes20) {
+    function slice20(bytes memory _bytes, uint256 _start) internal pure returns (bytes20) {
         return bytes20(slice32(_bytes, _start));
     }
 
     /// @notice take a 8-byte slice from the specified position
-    function slice8(bytes memory _bytes, uint _start) internal pure returns (bytes8) {
+    function slice8(bytes memory _bytes, uint256 _start) internal pure returns (bytes8) {
         return bytes8(slice32(_bytes, _start));
     }
 
     /// @notice take a 4-byte slice from the specified position
-    function slice4(bytes memory _bytes, uint _start) internal pure returns (bytes4) {
+    function slice4(bytes memory _bytes, uint256 _start) internal pure returns (bytes4) {
         return bytes4(slice32(_bytes, _start));
     }
 
     /// @notice take a 3-byte slice from the specified position
-    function slice3(bytes memory _bytes, uint _start) internal pure returns (bytes3) {
+    function slice3(bytes memory _bytes, uint256 _start) internal pure returns (bytes3) {
         return bytes3(slice32(_bytes, _start));
     }
 
     /// @notice take a 2-byte slice from the specified position
-    function slice2(bytes memory _bytes, uint _start) internal pure returns (bytes2) {
+    function slice2(bytes memory _bytes, uint256 _start) internal pure returns (bytes2) {
         return bytes2(slice32(_bytes, _start));
     }
 
-    function toAddress(bytes memory _bytes, uint _start) internal  pure returns (address) {
-        uint _totalLen = _start + 20;
+    function toAddress(bytes memory _bytes, uint256 _start) internal pure returns (address) {
+        uint256 _totalLen = _start + 20;
         require(_totalLen > _start && _bytes.length >= _totalLen, "Address conversion out of bounds.");
         address tempAddress;
 
@@ -344,8 +329,8 @@ library BytesLib {
         return tempAddress;
     }
 
-    function toUint(bytes memory _bytes, uint _start) internal  pure returns (uint256) {
-        uint _totalLen = _start + 32;
+    function toUint(bytes memory _bytes, uint256 _start) internal pure returns (uint256) {
+        uint256 _totalLen = _start + 32;
         require(_totalLen > _start && _bytes.length >= _totalLen, "Uint conversion out of bounds.");
         uint256 tempUint;
 
@@ -374,11 +359,10 @@ library BytesLib {
                 let mc := add(_preBytes, 0x20)
                 let end := add(mc, length)
 
-                for {
-                    let cc := add(_postBytes, 0x20)
-                    // the next line is the loop condition:
-                    // while(uint(mc < end) + cb == 2)
-                } eq(add(lt(mc, end), cb), 2) {
+                for { let cc := add(_postBytes, 0x20) }
+                // the next line is the loop condition:
+                // while(uint(mc < end) + cb == 2)
+                eq(add(lt(mc, end), cb), 2) {
                     mc := add(mc, 0x20)
                     cc := add(cc, 0x20)
                 } {
@@ -464,7 +448,7 @@ library BytesLib {
         return success;
     }
 
-    function toBytes32(bytes memory _source) pure internal returns (bytes32 result) {
+    function toBytes32(bytes memory _source) internal pure returns (bytes32 result) {
         if (_source.length == 0) {
             return 0x0;
         }
@@ -474,8 +458,12 @@ library BytesLib {
         }
     }
 
-    function keccak256Slice(bytes memory _bytes, uint _start, uint _length) pure internal returns (bytes32 result) {
-        uint _end = _start + _length;
+    function keccak256Slice(bytes memory _bytes, uint256 _start, uint256 _length)
+        internal
+        pure
+        returns (bytes32 result)
+    {
+        uint256 _end = _start + _length;
         require(_end > _start && _bytes.length >= _end, "Slice out of bounds");
 
         assembly {

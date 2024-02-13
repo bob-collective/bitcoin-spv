@@ -1,10 +1,13 @@
 pragma solidity ^0.8.4;
 
-/** @title ValidateSPV*/
-/** @author Summa (https://summa.one) */
+/**
+ * @title ValidateSPV
+ */
+/**
+ * @author Summa (https://summa.one)
+ */
 
 import {ValidateSPV} from "./ValidateSPV.sol";
-
 
 library ValidateSPVDelegate {
     function getErrBadLength() public pure returns (uint256) {
@@ -26,12 +29,11 @@ library ValidateSPVDelegate {
     /// @param _proof           The proof (concatenated LE hashes)
     /// @param _index           The proof index
     /// @return                 true if fully valid, false otherwise
-    function prove(
-        bytes32 _txid,
-        bytes32 _merkleRoot,
-        bytes memory _proof,
-        uint _index
-    ) public view returns (bool) {
+    function prove(bytes32 _txid, bytes32 _merkleRoot, bytes memory _proof, uint256 _index)
+        public
+        view
+        returns (bool)
+    {
         return ValidateSPV.prove(_txid, _merkleRoot, _proof, _index);
     }
 
@@ -42,12 +44,11 @@ library ValidateSPVDelegate {
     /// @param _vout        Raw bytes length-prefixed output vector
     /// @ param _locktime   4-byte tx locktime
     /// @return             32-byte transaction id, little endian
-    function calculateTxId(
-        bytes4 _version,
-        bytes memory _vin,
-        bytes memory _vout,
-        bytes4 _locktime
-    ) public view returns (bytes32) {
+    function calculateTxId(bytes4 _version, bytes memory _vin, bytes memory _vout, bytes4 _locktime)
+        public
+        view
+        returns (bytes32)
+    {
         return ValidateSPV.calculateTxId(_version, _vin, _vout, _locktime);
     }
 

@@ -1,7 +1,11 @@
 pragma solidity ^0.8.4;
 
-/** @title BitcoinSPV */
-/** @author Summa (https://summa.one) */
+/**
+ * @title BitcoinSPV
+ */
+/**
+ * @author Summa (https://summa.one)
+ */
 
 import {BytesLib} from "./BytesLib.sol";
 import {SafeMath} from "./SafeMath.sol";
@@ -13,8 +17,8 @@ library BTCUtils {
     // The target at minimum Difficulty. Also the target of the genesis block
     uint256 public constant DIFF1_TARGET = 0xffff0000000000000000000000000000000000000000000000000000;
 
-    uint256 public constant RETARGET_PERIOD = 2 * 7 * 24 * 60 * 60;  // 2 weeks in seconds
-    uint256 public constant RETARGET_PERIOD_BLOCKS = 2016;  // 2 weeks in blocks
+    uint256 public constant RETARGET_PERIOD = 2 * 7 * 24 * 60 * 60; // 2 weeks in seconds
+    uint256 public constant RETARGET_PERIOD_BLOCKS = 2016; // 2 weeks in blocks
 
     uint256 public constant ERR_BAD_ARG = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
@@ -37,16 +41,16 @@ library BTCUtils {
     /// @return         The number of non-flag bytes in the VarInt
     function determineVarIntDataLengthAt(bytes memory _b, uint256 _at) internal pure returns (uint8) {
         if (uint8(_b[_at]) == 0xff) {
-            return 8;  // one-byte flag, 8 bytes data
+            return 8; // one-byte flag, 8 bytes data
         }
         if (uint8(_b[_at]) == 0xfe) {
-            return 4;  // one-byte flag, 4 bytes data
+            return 4; // one-byte flag, 4 bytes data
         }
         if (uint8(_b[_at]) == 0xfd) {
-            return 2;  // one-byte flag, 2 bytes data
+            return 2; // one-byte flag, 2 bytes data
         }
 
-        return 0;  // flag is data
+        return 0; // flag is data
     }
 
     /// @notice     Parse a VarInt into its data length and the number it represents
@@ -91,7 +95,7 @@ library BTCUtils {
     function reverseEndianness(bytes memory _b) internal pure returns (bytes memory) {
         bytes memory _newValue = new bytes(_b.length);
 
-        for (uint i = 0; i < _b.length; i++) {
+        for (uint256 i = 0; i < _b.length; i++) {
             _newValue[_b.length - i - 1] = _b[i];
         }
 
@@ -106,17 +110,17 @@ library BTCUtils {
         v = _b;
 
         // swap bytes
-        v = ((v >> 8) & 0x00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF) |
-            ((v & 0x00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF) << 8);
+        v = ((v >> 8) & 0x00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF)
+            | ((v & 0x00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF) << 8);
         // swap 2-byte long pairs
-        v = ((v >> 16) & 0x0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF) |
-            ((v & 0x0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF) << 16);
+        v = ((v >> 16) & 0x0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF)
+            | ((v & 0x0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF) << 16);
         // swap 4-byte long pairs
-        v = ((v >> 32) & 0x00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF) |
-            ((v & 0x00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF) << 32);
+        v = ((v >> 32) & 0x00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF)
+            | ((v & 0x00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF) << 32);
         // swap 8-byte long pairs
-        v = ((v >> 64) & 0x0000000000000000FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF) |
-            ((v & 0x0000000000000000FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF) << 64);
+        v = ((v >> 64) & 0x0000000000000000FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF)
+            | ((v & 0x0000000000000000FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF) << 64);
         // swap 16-byte long pairs
         v = (v >> 128) | (v << 128);
     }
@@ -128,11 +132,9 @@ library BTCUtils {
         v = _b;
 
         // swap bytes
-        v = ((v >> 8) & 0x00FF00FF00FF00FF) |
-            ((v & 0x00FF00FF00FF00FF) << 8);
+        v = ((v >> 8) & 0x00FF00FF00FF00FF) | ((v & 0x00FF00FF00FF00FF) << 8);
         // swap 2-byte long pairs
-        v = ((v >> 16) & 0x0000FFFF0000FFFF) |
-            ((v & 0x0000FFFF0000FFFF) << 16);
+        v = ((v >> 16) & 0x0000FFFF0000FFFF) | ((v & 0x0000FFFF0000FFFF) << 16);
         // swap 4-byte long pairs
         v = (v >> 32) | (v << 32);
     }
@@ -144,8 +146,7 @@ library BTCUtils {
         v = _b;
 
         // swap bytes
-        v = ((v >> 8) & 0x00FF00FF) |
-            ((v & 0x00FF00FF) << 8);
+        v = ((v >> 8) & 0x00FF00FF) | ((v & 0x00FF00FF) << 8);
         // swap 2-byte long pairs
         v = (v >> 16) | (v << 16);
     }
@@ -154,16 +155,15 @@ library BTCUtils {
     /// @param _b        The unsigned integer to reverse
     /// @return v        The reversed value
     function reverseUint24(uint24 _b) internal pure returns (uint24 v) {
-        v =  (_b << 16) | (_b & 0x00FF00) | (_b >> 16);
+        v = (_b << 16) | (_b & 0x00FF00) | (_b >> 16);
     }
 
     /// @notice          Changes the endianness of a uint16
     /// @param _b        The unsigned integer to reverse
     /// @return v        The reversed value
     function reverseUint16(uint16 _b) internal pure returns (uint16 v) {
-        v =  (_b << 8) | (_b >> 8);
+        v = (_b << 8) | (_b >> 8);
     }
-
 
     /// @notice          Converts big-endian bytes to a uint
     /// @dev             Traverses the byte array and sums the bytes
@@ -172,7 +172,7 @@ library BTCUtils {
     function bytesToUint(bytes memory _b) internal pure returns (uint256) {
         uint256 _number;
 
-        for (uint i = 0; i < _b.length; i++) {
+        for (uint256 i = 0; i < _b.length; i++) {
             _number = _number + uint8(_b[i]) * (2 ** (8 * (_b.length - (i + 1))));
         }
 
@@ -254,11 +254,7 @@ library BTCUtils {
     /// @param at        The start of the pre-image
     /// @param len       The length of the pre-image
     /// @return res      The digest
-    function hash256Slice(
-        bytes memory _b,
-        uint256 at,
-        uint256 len
-    ) internal view returns (bytes32 res) {
+    function hash256Slice(bytes memory _b, uint256 at, uint256 len) internal view returns (bytes32 res) {
         // solium-disable-next-line security/no-inline-assembly
         assembly {
             pop(staticcall(gas(), 2, add(_b, add(32, at)), len, 0x00, 32))
@@ -287,7 +283,7 @@ library BTCUtils {
         uint256 _len = 0;
         uint256 _offset = 1 + _varIntDataLen;
 
-        for (uint256 _i = 0; _i < _index; _i ++) {
+        for (uint256 _i = 0; _i < _index; _i++) {
             _len = determineInputLengthAt(_vin, _offset);
             require(_len != ERR_BAD_ARG, "Bad VarInt in scriptSig");
             _offset = _offset + _len;
@@ -382,6 +378,7 @@ library BTCUtils {
     /// @dev             Will return hex"00" if passed a witness input
     /// @param _input    The LEGACY input
     /// @return          The length-prepended scriptSig
+
     function extractScriptSig(bytes memory _input) internal pure returns (bytes memory) {
         uint256 _varIntDataLen;
         uint256 _scriptSigLen;
@@ -389,7 +386,6 @@ library BTCUtils {
         require(_varIntDataLen != ERR_BAD_ARG, "Bad VarInt in scriptSig");
         return _input.slice(36, 1 + _varIntDataLen + _scriptSigLen);
     }
-
 
     /* ************* */
     /* Witness Input */
@@ -507,7 +503,7 @@ library BTCUtils {
         uint256 _len = 0;
         uint256 _offset = 1 + _varIntDataLen;
 
-        for (uint256 _i = 0; _i < _index; _i ++) {
+        for (uint256 _i = 0; _i < _index; _i++) {
             _len = determineOutputLengthAt(_vout, _offset);
             require(_len != ERR_BAD_ARG, "Bad VarInt in scriptPubkey");
             _offset += _len;
@@ -575,11 +571,7 @@ library BTCUtils {
     /// @param _len      The length of the output script
     ///                  (output length - 8)
     /// @return          The hash committed to by the pk_script, or null for errors
-    function extractHashAt(
-        bytes memory _output,
-        uint256 _at,
-        uint256 _len
-    ) internal pure returns (bytes memory) {
+    function extractHashAt(bytes memory _output, uint256 _at, uint256 _len) internal pure returns (bytes memory) {
         uint8 _scriptLen = uint8(_output[_at]);
 
         // don't have to worry about overflow here.
@@ -607,12 +599,11 @@ library BTCUtils {
             if (_tag == hex"1976a9") {
                 // Check for maliciously formatted p2pkh
                 // No need to worry about underflow, b/c of _scriptLen check
-                if (uint8(_output[_at + 3]) != 0x14 ||
-                    _output.slice2(_at + _len - 2) != hex"88ac") {
+                if (uint8(_output[_at + 3]) != 0x14 || _output.slice2(_at + _len - 2) != hex"88ac") {
                     return hex"";
                 }
                 return _output.slice(_at + 4, 20);
-            //p2sh
+                //p2sh
             } else if (_tag == hex"17a914") {
                 // Check for maliciously formatted p2sh
                 // No need to worry about underflow, b/c of _scriptLen check
@@ -622,13 +613,12 @@ library BTCUtils {
                 return _output.slice(_at + 3, 20);
             }
         }
-        return hex"";  /* NB: will trigger on OPRETURN and any non-standard that doesn't overrun */
+        return hex""; /* NB: will trigger on OPRETURN and any non-standard that doesn't overrun */
     }
 
     /* ********** */
     /* Witness TX */
     /* ********** */
-
 
     /// @notice      Checks that the vin passed up is properly formatted
     /// @dev         Consider a vin with a valid vout in its scriptsig
@@ -704,8 +694,6 @@ library BTCUtils {
         return _offset == _vout.length;
     }
 
-
-
     /* ************ */
     /* Block Header */
     /* ************ */
@@ -735,7 +723,7 @@ library BTCUtils {
         uint24 _m = uint24(_header.slice3(72 + at));
         uint8 _e = uint8(_header[75 + at]);
         uint256 _mantissa = uint256(reverseUint24(_m));
-        uint _exponent = _e - 3;
+        uint256 _exponent = _e - 3;
 
         return _mantissa * (256 ** _exponent);
     }
@@ -763,10 +751,7 @@ library BTCUtils {
     /// @param _header   The array containing the header
     /// @param at        The start of the header
     /// @return          The previous block's hash (little-endian)
-    function extractPrevBlockLEAt(
-        bytes memory _header,
-        uint256 at
-    ) internal pure returns (bytes32) {
+    function extractPrevBlockLEAt(bytes memory _header, uint256 at) internal pure returns (bytes32) {
         return _header.slice32(4 + at);
     }
 
@@ -810,13 +795,12 @@ library BTCUtils {
         return hash256Pair(_a, _b);
     }
 
-
     /// @notice          Verifies a Bitcoin-style merkle tree
     /// @dev             Leaves are 0-indexed. Inefficient version.
     /// @param _proof    The proof. Tightly packed LE sha256 hashes. The last hash is the root
     /// @param _index    The index of the leaf
     /// @return          true if the proof is valid, else false
-    function verifyHash256Merkle(bytes memory _proof, uint _index) internal view returns (bool) {
+    function verifyHash256Merkle(bytes memory _proof, uint256 _index) internal view returns (bool) {
         // Not an even number of hashes
         if (_proof.length % 32 != 0) {
             return false;
@@ -847,12 +831,11 @@ library BTCUtils {
     /// @param _root     The root of the proof. LE sha256 hash.
     /// @param _index    The index of the leaf
     /// @return          true if the proof is valid, else false
-    function verifyHash256Merkle(
-        bytes32 _leaf,
-        bytes memory _tree,
-        bytes32 _root,
-        uint _index
-    ) internal view returns (bool) {
+    function verifyHash256Merkle(bytes32 _leaf, bytes memory _tree, bytes32 _root, uint256 _index)
+        internal
+        view
+        returns (bool)
+    {
         // Not an even number of hashes
         if (_tree.length % 32 != 0) {
             return false;
@@ -863,11 +846,11 @@ library BTCUtils {
             return false;
         }
 
-        uint _idx = _index;
+        uint256 _idx = _index;
         bytes32 _current = _leaf;
 
         // i moves in increments of 32
-        for (uint i = 0; i < _tree.length; i += 32) {
+        for (uint256 i = 0; i < _tree.length; i += 32) {
             if (_idx % 2 == 1) {
                 _current = _hash256MerkleStep(_tree.slice32(i), _current);
             } else {
@@ -890,11 +873,11 @@ library BTCUtils {
     /// @param _firstTimestamp  the timestamp of the first block in the difficulty period
     /// @param _secondTimestamp the timestamp of the last block in the difficulty period
     /// @return                 the new period's target threshold
-    function retargetAlgorithm(
-        uint256 _previousTarget,
-        uint256 _firstTimestamp,
-        uint256 _secondTimestamp
-    ) internal pure returns (uint256) {
+    function retargetAlgorithm(uint256 _previousTarget, uint256 _firstTimestamp, uint256 _secondTimestamp)
+        internal
+        pure
+        returns (uint256)
+    {
         uint256 _elapsedTime = _secondTimestamp.sub(_firstTimestamp);
 
         // Normalize ratio to factor of 4 if very long or very short
