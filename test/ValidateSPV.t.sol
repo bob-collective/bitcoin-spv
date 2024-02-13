@@ -14,22 +14,22 @@ contract ValidateSPVTest is Test {
     function test_TheConstantGettersForThatSweetSweetCoverage() public {
         bytes memory getErrBadLengthOutput = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
         uint256 res1 = instance.getErrBadLength();
-        assertEq(res1, uint(bytes32(getErrBadLengthOutput)));
+        assertEq(res1, uint256(bytes32(getErrBadLengthOutput)));
 
         bytes memory getErrInvalidChainOutput = hex"fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe";
         uint256 res2 = instance.getErrInvalidChain();
-        assertEq(res2, uint(bytes32(getErrInvalidChainOutput)));
+        assertEq(res2, uint256(bytes32(getErrInvalidChainOutput)));
 
         bytes memory getErrLowWorkOutput = hex"fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd";
         uint256 res3 = instance.getErrLowWork();
-        assertEq(res3, uint(bytes32(getErrLowWorkOutput)));
+        assertEq(res3, uint256(bytes32(getErrLowWorkOutput)));
     }
 
     struct ProveTest {
         bytes32 inputTxIdLE;
         bytes32 inputMerkleRootLE;
         bytes inputProof;
-        uint inputIndex;
+        uint256 inputIndex;
         bool output;
     }
 
@@ -58,7 +58,7 @@ contract ValidateSPVTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             bool res = instance.prove(
                 testCases[i].inputTxIdLE,
                 testCases[i].inputMerkleRootLE,
@@ -72,7 +72,8 @@ contract ValidateSPVTest is Test {
     function test_ReturnsTheTransactionHash() public {
         bytes4 version = hex"01000000";
         bytes memory vin = hex"011746bd867400f3494b8f44c24b83e1aa58c4f0ff25b4a61cffeffd4bc0f9ba300000000000ffffffff";
-        bytes memory vout = hex"024897070000000000220020a4333e5612ab1a1043b25755c89b16d55184a42f81799e623e6bc39db8539c180000000000000000166a14edb1b5c2f39af0fec151732585b1049b07895211";
+        bytes memory vout =
+            hex"024897070000000000220020a4333e5612ab1a1043b25755c89b16d55184a42f81799e623e6bc39db8539c180000000000000000166a14edb1b5c2f39af0fec151732585b1049b07895211";
         bytes4 locktime = hex"00000000";
 
         bytes32 output = hex"48e5a1a0e616d8fd92b4ef228c424e0c816799a256c6a90892195ccfc53300d6";
@@ -82,10 +83,11 @@ contract ValidateSPVTest is Test {
     }
 
     function test_ReturnsTrueIfHeaderChainIsValid() public {
-        bytes memory input = hex"0000002073bd2184edd9c4fc76642ea6754ee40136970efc10c4190000000000000000000296ef123ea96da5cf695f22bf7d94be87d49db1ad7ac371ac43c4da4161c8c216349c5ba11928170d38782b00000020fe70e48339d6b17fbbf1340d245338f57336e97767cc240000000000000000005af53b865c27c6e9b5e5db4c3ea8e024f8329178a79ddb39f7727ea2fe6e6825d1349c5ba1192817e2d9515900000020baaea6746f4c16ccb7cd961655b636d39b5fe1519b8f15000000000000000000c63a8848a448a43c9e4402bd893f701cd11856e14cbbe026699e8fdc445b35a8d93c9c5ba1192817b945dc6c00000020f402c0b551b944665332466753f1eebb846a64ef24c71700000000000000000033fc68e070964e908d961cd11033896fa6c9b8b76f64a2db7ea928afa7e304257d3f9c5ba11928176164145d0000ff3f63d40efa46403afd71a254b54f2b495b7b0164991c2d22000000000000000000f046dc1b71560b7d0786cfbdb25ae320bd9644c98d5c7c77bf9df05cbe96212758419c5ba1192817a2bb2caa00000020e2d4f0edd5edd80bdcb880535443747c6b22b48fb6200d0000000000000000001d3799aa3eb8d18916f46bf2cf807cb89a9b1b4c56c3f2693711bf1064d9a32435429c5ba1192817752e49ae0000002022dba41dff28b337ee3463bf1ab1acf0e57443e0f7ab1d000000000000000000c3aadcc8def003ecbd1ba514592a18baddddcd3a287ccf74f584b04c5c10044e97479c5ba1192817c341f595";
-        uint output = 49134394618239;
+        bytes memory input =
+            hex"0000002073bd2184edd9c4fc76642ea6754ee40136970efc10c4190000000000000000000296ef123ea96da5cf695f22bf7d94be87d49db1ad7ac371ac43c4da4161c8c216349c5ba11928170d38782b00000020fe70e48339d6b17fbbf1340d245338f57336e97767cc240000000000000000005af53b865c27c6e9b5e5db4c3ea8e024f8329178a79ddb39f7727ea2fe6e6825d1349c5ba1192817e2d9515900000020baaea6746f4c16ccb7cd961655b636d39b5fe1519b8f15000000000000000000c63a8848a448a43c9e4402bd893f701cd11856e14cbbe026699e8fdc445b35a8d93c9c5ba1192817b945dc6c00000020f402c0b551b944665332466753f1eebb846a64ef24c71700000000000000000033fc68e070964e908d961cd11033896fa6c9b8b76f64a2db7ea928afa7e304257d3f9c5ba11928176164145d0000ff3f63d40efa46403afd71a254b54f2b495b7b0164991c2d22000000000000000000f046dc1b71560b7d0786cfbdb25ae320bd9644c98d5c7c77bf9df05cbe96212758419c5ba1192817a2bb2caa00000020e2d4f0edd5edd80bdcb880535443747c6b22b48fb6200d0000000000000000001d3799aa3eb8d18916f46bf2cf807cb89a9b1b4c56c3f2693711bf1064d9a32435429c5ba1192817752e49ae0000002022dba41dff28b337ee3463bf1ab1acf0e57443e0f7ab1d000000000000000000c3aadcc8def003ecbd1ba514592a18baddddcd3a287ccf74f584b04c5c10044e97479c5ba1192817c341f595";
+        uint256 output = 49134394618239;
 
-        uint res = instance.validateHeaderChain(input);
+        uint256 res = instance.validateHeaderChain(input);
         assertEq(res, output);
     }
 
@@ -110,10 +112,9 @@ contract ValidateSPVTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             uint256 res = instance.validateHeaderChain(testCases[i].input);
             assertEq(res, uint256(testCases[i].errorValue));
-
 
             // Execute within Tx to measure gas amount
             instance.validateHeaderChainTx(testCases[i].input);
@@ -145,11 +146,8 @@ contract ValidateSPVTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
-            bool res = instance.validateHeaderWork(
-                testCases[i].inputDigest,
-                uint256(testCases[i].inputTarget)
-            );
+        for (uint256 i = 0; i < testCases.length; i++) {
+            bool res = instance.validateHeaderWork(testCases[i].inputDigest, uint256(testCases[i].inputTarget));
             assertEq(res, testCases[i].output);
         }
     }
@@ -174,11 +172,8 @@ contract ValidateSPVTest is Test {
             })
         ];
 
-        for (uint i = 0; i < testCases.length; i++) {
-            bool res = instance.validateHeaderPrevHash(
-                testCases[i].inputHeader,
-                testCases[i].inputPrevHash
-            );
+        for (uint256 i = 0; i < testCases.length; i++) {
+            bool res = instance.validateHeaderPrevHash(testCases[i].inputHeader, testCases[i].inputPrevHash);
             assertEq(res, testCases[i].output);
         }
     }

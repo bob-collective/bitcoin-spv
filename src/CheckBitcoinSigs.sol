@@ -1,14 +1,16 @@
 pragma solidity ^0.8.4;
 
-/** @title CheckBitcoinSigs */
-/** @author Summa (https://summa.one) */
+/**
+ * @title CheckBitcoinSigs
+ */
+/**
+ * @author Summa (https://summa.one)
+ */
 
 import {BytesLib} from "./BytesLib.sol";
 import {BTCUtils} from "./BTCUtils.sol";
 
-
 library CheckBitcoinSigs {
-
     using BytesLib for bytes;
     using BTCUtils for bytes;
 
@@ -56,13 +58,11 @@ library CheckBitcoinSigs {
     /// @param _r        the signature r value
     /// @param _s        the signature s value
     /// @return          true if signature is valid, else false
-    function checkSig(
-        bytes memory _pubkey,
-        bytes32 _digest,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    ) internal pure returns (bool) {
+    function checkSig(bytes memory _pubkey, bytes32 _digest, uint8 _v, bytes32 _r, bytes32 _s)
+        internal
+        pure
+        returns (bool)
+    {
         require(_pubkey.length == 64, "Requires uncompressed unprefixed pubkey");
         address _expected = accountFromPubkey(_pubkey);
         address _actual = ecrecover(_digest, _v, _r, _s);
@@ -88,8 +88,8 @@ library CheckBitcoinSigs {
     ) internal view returns (bool) {
         require(_pubkey.length == 64, "Requires uncompressed unprefixed pubkey");
 
-        bool _isExpectedSigner = keccak256(p2wpkhFromPubkey(_pubkey)) == keccak256(_p2wpkhOutputScript);  // is it the expected signer?
-        if (!_isExpectedSigner) {return false;}
+        bool _isExpectedSigner = keccak256(p2wpkhFromPubkey(_pubkey)) == keccak256(_p2wpkhOutputScript); // is it the expected signer?
+        if (!_isExpectedSigner) return false;
 
         bool _sigResult = checkSig(_pubkey, _digest, _v, _r, _s);
         return _sigResult;
@@ -100,10 +100,7 @@ library CheckBitcoinSigs {
     /// @param _digest      the digest
     /// @param _candidate   the purported preimage
     /// @return             true if the preimage matches the digest, else false
-    function isSha256Preimage(
-        bytes memory _candidate,
-        bytes32 _digest
-    ) internal pure returns (bool) {
+    function isSha256Preimage(bytes memory _candidate, bytes32 _digest) internal pure returns (bool) {
         return sha256(_candidate) == _digest;
     }
 
@@ -112,10 +109,7 @@ library CheckBitcoinSigs {
     /// @param _digest      the digest
     /// @param _candidate   the purported preimage
     /// @return             true if the preimage matches the digest, else false
-    function isKeccak256Preimage(
-        bytes memory _candidate,
-        bytes32 _digest
-    ) internal pure returns (bool) {
+    function isKeccak256Preimage(bytes memory _candidate, bytes32 _digest) internal pure returns (bool) {
         return keccak256(_candidate) == _digest;
     }
 
@@ -128,11 +122,11 @@ library CheckBitcoinSigs {
     /// @param _outputScript    the length-prefixed output script
     /// @return                 the double-sha256 (hash256) signature hash as defined by bip143
     function wpkhSpendSighash(
-        bytes memory _outpoint,  // 36-byte UTXO id
-        bytes20 _inputPKH,       // 20-byte hash160
-        bytes8 _inputValue,      // 8-byte LE
-        bytes8 _outputValue,     // 8-byte LE
-        bytes memory _outputScript    // lenght-prefixed output script
+        bytes memory _outpoint, // 36-byte UTXO id
+        bytes20 _inputPKH, // 20-byte hash160
+        bytes8 _inputValue, // 8-byte LE
+        bytes8 _outputValue, // 8-byte LE
+        bytes memory _outputScript // lenght-prefixed output script
     ) internal view returns (bytes32) {
         // Fixes elements to easily make a 1-in 1-out sighash digest
         // Does not support timelocks
@@ -141,25 +135,24 @@ library CheckBitcoinSigs {
         //     _inputPKH,
         //     hex"88ac");  // equal, checksig
 
-        bytes32 _hashOutputs = abi.encodePacked(
-            _outputValue,  // 8-byte LE
-            _outputScript).hash256View();
+        bytes32 _hashOutputs = abi.encodePacked(_outputValue, _outputScript) // 8-byte LE
+            .hash256View();
 
         bytes memory _sighashPreimage = abi.encodePacked(
-            hex"01000000",  // version
-            _outpoint.hash256View(),  // hashPrevouts
-            hex"8cb9012517c817fead650287d61bdd9c68803b6bf9c64133dcab3e65b5a50cb9",  // hashSequence(00000000)
-            _outpoint,  // outpoint
+            hex"01000000", // version
+            _outpoint.hash256View(), // hashPrevouts
+            hex"8cb9012517c817fead650287d61bdd9c68803b6bf9c64133dcab3e65b5a50cb9", // hashSequence(00000000)
+            _outpoint, // outpoint
             // p2wpkh script code
-            hex"1976a914",  // length, dup, hash160, pkh_length
+            hex"1976a914", // length, dup, hash160, pkh_length
             _inputPKH,
-            hex"88ac",  // equal, checksig
+            hex"88ac", // equal, checksig
             // end script code
-            _inputValue,  // value of the input in 8-byte LE
-            hex"00000000",  // input nSequence
-            _hashOutputs,  // hash of the single output
-            hex"00000000",  // nLockTime
-            hex"01000000"  // SIGHASH_ALL
+            _inputValue, // value of the input in 8-byte LE
+            hex"00000000", // input nSequence
+            _hashOutputs, // hash of the single output
+            hex"00000000", // nLockTime
+            hex"01000000" // SIGHASH_ALL
         );
         return _sighashPreimage.hash256View();
     }
@@ -173,11 +166,11 @@ library CheckBitcoinSigs {
     /// @param _outputPKH       the output pubkeyhash (hash160(recipient_pubkey))
     /// @return                 the double-sha256 (hash256) signature hash as defined by bip143
     function wpkhToWpkhSighash(
-        bytes memory _outpoint,  // 36-byte UTXO id
-        bytes20 _inputPKH,  // 20-byte hash160
-        bytes8 _inputValue,  // 8-byte LE
-        bytes8 _outputValue,  // 8-byte LE
-        bytes20 _outputPKH  // 20-byte hash160
+        bytes memory _outpoint, // 36-byte UTXO id
+        bytes20 _inputPKH, // 20-byte hash160
+        bytes8 _inputValue, // 8-byte LE
+        bytes8 _outputValue, // 8-byte LE
+        bytes20 _outputPKH // 20-byte hash160
     ) internal view returns (bytes32) {
         return wpkhSpendSighash(
             _outpoint,
@@ -185,9 +178,10 @@ library CheckBitcoinSigs {
             _inputValue,
             _outputValue,
             abi.encodePacked(
-              hex"160014",  // wpkh tag
-              _outputPKH)
-            );
+                hex"160014", // wpkh tag
+                _outputPKH
+            )
+        );
     }
 
     /// @notice                 Preserved for API compatibility with older version
@@ -199,13 +193,12 @@ library CheckBitcoinSigs {
     /// @param _outputPKH       the output pubkeyhash (hash160(recipient_pubkey))
     /// @return                 the double-sha256 (hash256) signature hash as defined by bip143
     function oneInputOneOutputSighash(
-        bytes memory _outpoint,  // 36-byte UTXO id
-        bytes20 _inputPKH,  // 20-byte hash160
-        bytes8 _inputValue,  // 8-byte LE
-        bytes8 _outputValue,  // 8-byte LE
-        bytes20 _outputPKH  // 20-byte hash160
+        bytes memory _outpoint, // 36-byte UTXO id
+        bytes20 _inputPKH, // 20-byte hash160
+        bytes8 _inputValue, // 8-byte LE
+        bytes8 _outputValue, // 8-byte LE
+        bytes20 _outputPKH // 20-byte hash160
     ) internal view returns (bytes32) {
         return wpkhToWpkhSighash(_outpoint, _inputPKH, _inputValue, _outputValue, _outputPKH);
     }
-
 }
