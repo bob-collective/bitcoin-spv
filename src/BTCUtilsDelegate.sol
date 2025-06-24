@@ -1,12 +1,14 @@
 pragma solidity ^0.8.4;
 
-/** @title BitcoinSPV */
-/** @author Summa (https://summa.one) */
-
+/**
+ * @title BitcoinSPV
+ */
+/**
+ * @author Summa (https://summa.one)
+ */
 import {BTCUtils} from "./BTCUtils.sol";
 
 library BTCUtilsDelegate {
-
     /* ***** */
     /* UTILS */
     /* ***** */
@@ -124,6 +126,7 @@ library BTCUtilsDelegate {
     /// @dev             Will return hex"00" if passed a witness input
     /// @param _input    The LEGACY input
     /// @return          The length-prepended script sig
+
     function extractScriptSig(bytes memory _input) public pure returns (bytes memory) {
         return BTCUtils.extractScriptSig(_input);
     }
@@ -136,7 +139,6 @@ library BTCUtilsDelegate {
         return BTCUtils.extractScriptSigLen(_input);
     }
 
-
     /* ************* */
     /* Witness Input */
     /* ************* */
@@ -148,7 +150,6 @@ library BTCUtilsDelegate {
     function extractSequenceLEWitness(bytes memory _input) public pure returns (bytes4) {
         return BTCUtils.extractSequenceLEWitness(_input);
     }
-
 
     /// @notice          Extracts the sequence from the input in a tx
     /// @dev             Sequence is a 4-byte little-endian number
@@ -165,7 +166,6 @@ library BTCUtilsDelegate {
     function extractOutpoint(bytes memory _input) public pure returns (bytes memory) {
         return BTCUtils.extractOutpoint(_input);
     }
-
 
     /// @notice          Extracts the outpoint tx id from an input
     /// @dev             32 byte tx id
@@ -240,7 +240,6 @@ library BTCUtilsDelegate {
     /* Witness TX */
     /* ********** */
 
-
     /// @notice      Checks that the vin passed up is properly formatted
     /// @dev         Consider a vin with a valid vout in its scriptsig
     /// @param _vin  Raw bytes length-prefixed input vector
@@ -256,8 +255,6 @@ library BTCUtilsDelegate {
     function validateVout(bytes memory _vout) public pure returns (bool) {
         return BTCUtils.validateVout(_vout);
     }
-
-
 
     /* ************ */
     /* Block Header */
@@ -333,7 +330,7 @@ library BTCUtilsDelegate {
     /// @param _proof    The proof. Tightly packed LE sha256 hashes. The last hash is the root
     /// @param _index    The index of the leaf
     /// @return          true if the proof is valid, else false
-    function verifyHash256Merkle(bytes memory _proof, uint _index) public view returns (bool) {
+    function verifyHash256Merkle(bytes memory _proof, uint256 _index) public view returns (bool) {
         return BTCUtils.verifyHash256Merkle(_proof, _index);
     }
 
@@ -349,11 +346,11 @@ library BTCUtilsDelegate {
     /// @param _firstTimestamp  the timestamp of the first block in the difficulty period
     /// @param _secondTimestamp the timestamp of the last block in the difficulty period
     /// @return                 the new period's target threshold
-    function retargetAlgorithm(
-        uint256 _previousTarget,
-        uint256 _firstTimestamp,
-        uint256 _secondTimestamp
-    ) public pure returns (uint256) {
+    function retargetAlgorithm(uint256 _previousTarget, uint256 _firstTimestamp, uint256 _secondTimestamp)
+        public
+        pure
+        returns (uint256)
+    {
         return BTCUtils.retargetAlgorithm(_previousTarget, _firstTimestamp, _secondTimestamp);
     }
 }
