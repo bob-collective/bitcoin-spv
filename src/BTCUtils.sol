@@ -1,14 +1,11 @@
 pragma solidity ^0.8.4;
 
-/**
- * @title BitcoinSPV
- */
-/**
- * @author Summa (https://summa.one)
- */
 import {BytesLib} from "./BytesLib.sol";
 import {SafeMath} from "./SafeMath.sol";
 
+/// @title BTCUtils
+/// @author Summa (https://github.com/summa-tx) and Bob (https://github.com/bob-collective)
+/// @notice Utility library for Bitcoin Actions
 library BTCUtils {
     using BytesLib for bytes;
     using SafeMath for uint256;
