@@ -1,12 +1,14 @@
 pragma solidity ^0.8.4;
 
-/** @title ValidateSPV*/
-/** @author Summa (https://summa.one) */
-
+/**
+ * @title ValidateSPV
+ */
+/**
+ * @author Summa (https://summa.one)
+ */
 import {CheckBitcoinSigs} from "../src/CheckBitcoinSigs.sol";
 
 contract CheckBitcoinSigsScript {
-
     /// @notice          Derives an Ethereum Account address from a pubkey
     /// @dev             The address is the last 20 bytes of the keccak256 of the address
     /// @param _pubkey   The public key X & Y. Unprefixed, as a 64-byte array
@@ -31,13 +33,7 @@ contract CheckBitcoinSigsScript {
     /// @param _r        the signature r value
     /// @param _s        the signature s value
     /// @return          true if signature is valid, else false
-    function checkSig(
-        bytes memory _pubkey,
-        bytes32 _digest,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    ) public returns (bool) {
+    function checkSig(bytes memory _pubkey, bytes32 _digest, uint8 _v, bytes32 _r, bytes32 _s) public returns (bool) {
         return CheckBitcoinSigs.checkSig(_pubkey, _digest, _v, _r, _s);
     }
 
@@ -58,23 +54,15 @@ contract CheckBitcoinSigsScript {
         bytes32 _r,
         bytes32 _s
     ) public returns (bool) {
-        return CheckBitcoinSigs.checkBitcoinSig(
-            _p2wpkhOutputScript,
-            _pubkey,
-            _digest,
-            _v,
-            _r,
-            _s);
+        return CheckBitcoinSigs.checkBitcoinSig(_p2wpkhOutputScript, _pubkey, _digest, _v, _r, _s);
     }
     /// @notice             checks if a message is the sha256 preimage of a digest
     /// @dev                this is NOT the hash256!  this step is necessary for ECDSA security!
     /// @param _digest      the digest
     /// @param _candidate   the purported preimage
     /// @return             true if the preimage matches the digest, else false
-    function isSha256Preimage(
-        bytes memory _candidate,
-        bytes32 _digest
-    ) public returns (bool) {
+
+    function isSha256Preimage(bytes memory _candidate, bytes32 _digest) public returns (bool) {
         return CheckBitcoinSigs.isSha256Preimage(_candidate, _digest);
     }
 
@@ -83,10 +71,7 @@ contract CheckBitcoinSigsScript {
     /// @param _digest      the digest
     /// @param _candidate   the purported preimage
     /// @return             true if the preimage matches the digest, else false
-    function isKeccak256Preimage(
-        bytes memory _candidate,
-        bytes32 _digest
-    ) public returns (bool) {
+    function isKeccak256Preimage(bytes memory _candidate, bytes32 _digest) public returns (bool) {
         return CheckBitcoinSigs.isKeccak256Preimage(_candidate, _digest);
     }
 
@@ -99,17 +84,12 @@ contract CheckBitcoinSigsScript {
     /// @param _outputPKH       the output pubkeyhash (hash160(recipient_pubkey))
     /// @return                 the double-sha256 (hash256) signature hash as defined by bip143
     function oneInputOneOutputSighash(
-        bytes memory _outpoint,  // 36 byte UTXO id
-        bytes20 _inputPKH,  // 20 byte hash160
-        bytes8 _inputValue,  // 8-byte LE
-        bytes8 _outputValue,  // 8-byte LE
-        bytes20 _outputPKH  // 20 byte hash160
+        bytes memory _outpoint, // 36 byte UTXO id
+        bytes20 _inputPKH, // 20 byte hash160
+        bytes8 _inputValue, // 8-byte LE
+        bytes8 _outputValue, // 8-byte LE
+        bytes20 _outputPKH // 20 byte hash160
     ) public returns (bytes32) {
-        return CheckBitcoinSigs.oneInputOneOutputSighash(
-            _outpoint,
-            _inputPKH,
-            _inputValue,
-            _outputValue,
-            _outputPKH);
+        return CheckBitcoinSigs.oneInputOneOutputSighash(_outpoint, _inputPKH, _inputValue, _outputValue, _outputPKH);
     }
 }
