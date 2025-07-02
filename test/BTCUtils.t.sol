@@ -178,19 +178,46 @@ contract BTCUtilsTest is Test {
     }
 
     function test_ExtractsTheHashFromAStandardOutput() public {
-        ExtractHashTest[3] memory testCases = [
+        ExtractHashTest[9] memory testCases = [
+            // p2wsh
             ExtractHashTest({
                 input: hex"4897070000000000220020a4333e5612ab1a1043b25755c89b16d55184a42f81799e623e6bc39db8539c18",
                 output: hex"a4333e5612ab1a1043b25755c89b16d55184a42f81799e623e6bc39db8539c18"
             }),
+            // p2wpkh
+            ExtractHashTest({
+                input: hex"0000000000000000160014841b80d2cc75f5345c482af96294d04fdd66b2b7",
+                output: hex"841b80d2cc75f5345c482af96294d04fdd66b2b7"
+            }),
+            // p2pkh
             ExtractHashTest({
                 input: hex"00000000000000001976a914000000000000000000000000000000000000000088ac",
                 output: hex"0000000000000000000000000000000000000000"
             }),
+            // p2sh
             ExtractHashTest({
                 input: hex"000000000000000017a914000000000000000000000000000000000000000087",
                 output: hex"0000000000000000000000000000000000000000"
-            })
+            }),
+            // p2tr
+            ExtractHashTest({
+                input: hex"00000000000000002251200f0c8db753acbd17343a39c2f3f4e35e4be6da749f9e35137ab220e7b238a667",
+                output: hex"0f0c8db753acbd17343a39c2f3f4e35e4be6da749f9e35137ab220e7b238a667"
+            }),
+            // empty
+            ExtractHashTest({input: hex"0000000000000000000000", output: hex""}),
+            // too short
+            ExtractHashTest({
+                input: hex"4897070000000000200018a4333e5612ab1a1043b25755c89b16d55184a42f81799e623e6bc39db8539c",
+                output: hex""
+            }),
+            // too long
+            ExtractHashTest({
+                input: hex"00000000000000002451220f0c8db753acbd17343a39c2f3f4e35e4be6da749f9e35137ab220e7b238a66767",
+                output: hex""
+            }),
+            // invalid tag
+            ExtractHashTest({input: hex"000000000000000017a814000000000000000000000000000000000000000087", output: hex""})
         ];
 
         for (uint256 i = 0; i < testCases.length; i++) {

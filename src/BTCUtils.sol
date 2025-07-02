@@ -1,14 +1,11 @@
 pragma solidity ^0.8.4;
 
-/**
- * @title BitcoinSPV
- */
-/**
- * @author Summa (https://summa.one)
- */
 import {BytesLib} from "./BytesLib.sol";
 import {SafeMath} from "./SafeMath.sol";
 
+/// @title BTCUtils
+/// @author Summa (https://github.com/summa-tx) and Bob (https://github.com/bob-collective)
+/// @notice Utility library for Bitcoin Actions
 library BTCUtils {
     using BytesLib for bytes;
     using SafeMath for uint256;
@@ -581,13 +578,17 @@ library BTCUtils {
             return hex"";
         }
 
-        if (uint8(_output[_at + 1]) == 0) {
+        // version opcode is 0x00 for p2wpkh and p2wsh, 0x51 for p2tr
+        uint256 _version = uint8(_output[_at + 1]);
+        if (_version == 0x00 || _version == 0x51) {
+            // p2wpkh, p2wsh, p2tr
             if (_scriptLen < 2) {
                 return hex"";
             }
             uint256 _payloadLen = uint8(_output[_at + 2]);
             // Check for maliciously formatted witness outputs.
             // No need to worry about underflow as long b/c of the `< 2` check
+            // p2wsh and p2tr have a payload length of 32 bytes, p2wpkh has a payload length of 20 bytes
             if (_payloadLen != _scriptLen - 2 || (_payloadLen != 0x20 && _payloadLen != 0x14)) {
                 return hex"";
             }
