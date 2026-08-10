@@ -120,9 +120,11 @@ library SegWitUtils {
         }
 
         _offset = _offsets[_nWit - scriptPosFromLast];
-        (, _len) = _witness.parseVarIntAt(_offset);
-        require(_len != BTCUtils.ERR_BAD_ARG, "Bad VarInt in witness");
+        (_varIntDataLen, _len) = _witness.parseVarIntAt(_offset);
+        require(_varIntDataLen != BTCUtils.ERR_BAD_ARG, "Bad VarInt in witness");
 
-        return _witness.slice(_offset, _len);
+        // `_offsets` records the start of each element *including* its length
+        // prefix, so skip the prefix to return the script itself
+        return _witness.slice(_offset + 1 + _varIntDataLen, _len);
     }
 }
