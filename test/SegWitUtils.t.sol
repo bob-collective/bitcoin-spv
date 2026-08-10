@@ -39,9 +39,41 @@ contract SegWitUtilsTest is Test {
         bytes memory witnessVector =
             hex"03406c00eb3c4d35fedd257051333b4ca81d1a25a37a9af4891f1fec2869edd56b14180eafbda8851d63138a724c9b15384bc5f0536de658bd294d426a36212e6f08a5209e2849b90a2353691fccedd467215c88eec89a5d0dcf468e6cf37abed344d746ac0063036f7264010118746578742f706c61696e3b636861727365743d7574662d38004c5e7b200a20202270223a20226272632d3230222c0a2020226f70223a20226465706c6f79222c0a2020227469636b223a20226f726469222c0a2020226d6178223a20223231303030303030222c0a2020226c696d223a202231303030220a7d6821c19e2849b90a2353691fccedd467215c88eec89a5d0dcf468e6cf37abed344d746";
 
-        assertEq(
-            keccak256(witnessVector.extractWitnessAtIndex(0).extractTapscript()),
-            0xf4573d2a3472df97b6a2d9ecb0dab17eef1bebb903ecad628de8e96b0cc7ab30
+        // Second element of the witness (0xa5 = 165 bytes), an ordinals envelope:
+        // <32-byte pubkey> OP_CHECKSIG OP_0 OP_IF "ord" ... OP_ENDIF
+        bytes memory tapscript =
+            hex"209e2849b90a2353691fccedd467215c88eec89a5d0dcf468e6cf37abed344d746ac0063036f7264010118746578742f706c61696e3b636861727365743d7574662d38004c5e7b200a20202270223a20226272632d3230222c0a2020226f70223a20226465706c6f79222c0a2020227469636b223a20226f726469222c0a2020226d6178223a20223231303030303030222c0a2020226c696d223a202231303030220a7d68";
+
+        bytes memory extracted = witnessVector.extractWitnessAtIndex(0).extractTapscript();
+        assertEq(extracted, tapscript);
+        // the length prefix must not be included, nor the trailing OP_ENDIF dropped
+        assertEq(uint8(extracted[0]), 0x20, "starts with OP_PUSHBYTES_32");
+        assertEq(uint8(extracted[extracted.length - 1]), 0x68, "ends with OP_ENDIF");
+    }
+
+    /// @dev Without an annex the script is the second-to-last element
+    function test_ExtractTapscriptWithoutAnnex() public {
+        bytes memory controlBlock = abi.encodePacked(hex"c0", bytes32(uint256(0xaa)));
+        bytes memory witnessVector = abi.encodePacked(hex"02", hex"025152", hex"21", controlBlock);
+
+        assertEq(witnessVector.extractTapscript(), hex"5152");
+    }
+
+    /// @dev Scripts over 252 bytes carry a multi-byte (0xfd) length prefix
+    function test_ExtractTapscriptWithMultiByteLengthPrefix() public {
+        bytes memory tapscript = new bytes(300);
+        for (uint256 i = 0; i < tapscript.length; i++) {
+            tapscript[i] = 0xab;
+        }
+        bytes memory controlBlock = abi.encodePacked(hex"c0", bytes32(uint256(0xaa)));
+        bytes memory witnessVector = abi.encodePacked(
+            hex"02",
+            hex"fd2c01", // 300 as a little-endian VarInt
+            tapscript,
+            hex"21",
+            controlBlock
         );
+
+        assertEq(witnessVector.extractTapscript(), tapscript);
     }
 }
